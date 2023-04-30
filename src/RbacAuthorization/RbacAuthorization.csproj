@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net7.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Description>A simple multi tenant role based access control library</Description>
+    <Authors>ianc1</Authors>
+    <PackageTags>rbac;roles;permissions;authorization</PackageTags>
+    <PackageProjectUrl>https://github.com/ianc1/RbacAuthorization</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/ianc1/RbacAuthorization.git</RepositoryUrl>
+    <LicenseUrl>https://github.com/ianc1/RbacAuthorization/blob/main/LICENSE</LicenseUrl>
+    <RepositoryType>git</RepositoryType>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <AnalysisMode>Recommended</AnalysisMode>
+    <IsPackable>true</IsPackable>
+    <IncludeSymbols>true</IncludeSymbols>
+    <IncludeSource>true</IncludeSource>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App"/>
+    <PackageReference Include="Microsoft.Identity.Web" Version="1.16.0"/>
+  </ItemGroup>
+</Project>  

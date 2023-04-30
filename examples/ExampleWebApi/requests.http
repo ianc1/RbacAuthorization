@@ -1,0 +1,12 @@
+
+### Get tasks for Tenant1
+# Generate a token with the Assistant role for Tenant1 by running:
+# dotnet user-jwts create --role "MyApp.Tenant1.Assistant"
+GET http://localhost:5003/tenant1/tasks
+authorization: bearer <replace with token>
+
+### Create task for Tenant1
+# Generate a token with the Supervisor role for Tenant1 by running:
+# dotnet user-jwts create --role "MyApp.Tenant1.Supervisor"
+POST http://localhost:5003/tenant1/tasks
+authorization: bearer <replace with token>
