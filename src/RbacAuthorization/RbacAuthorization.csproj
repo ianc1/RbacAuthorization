@@ -4,12 +4,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Description>A simple multi tenant role based access control library</Description>
+    <Description>A simple role based access control library for single and multi tenant applications.</Description>
     <Authors>ianc1</Authors>
     <PackageTags>rbac;roles;permissions;authorization</PackageTags>
     <PackageProjectUrl>https://github.com/ianc1/RbacAuthorization</PackageProjectUrl>
     <RepositoryUrl>https://github.com/ianc1/RbacAuthorization.git</RepositoryUrl>
     <LicenseUrl>https://github.com/ianc1/RbacAuthorization/blob/main/LICENSE</LicenseUrl>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryType>git</RepositoryType>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <AnalysisMode>Recommended</AnalysisMode>
@@ -19,8 +21,14 @@
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <Version>1.0.0</Version>
   </PropertyGroup>
+
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App"/>
     <PackageReference Include="Microsoft.Identity.Web" Version="1.16.0"/>
   </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE" Pack="true" PackagePath=""/>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+  </ItemGroup> 
 </Project>  
