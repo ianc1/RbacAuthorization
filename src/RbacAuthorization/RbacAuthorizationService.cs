@@ -4,30 +4,20 @@ using System.Security.Claims;
 
 public class RbacAuthorizationService
 {
-    private readonly RbacAuthorizationOptions rbacAuthorizationOptions;
-    private readonly TenantRoleBuilder tenantRoleBuilder;
+    private readonly IUserRolesLocator userRolesLocator;
+    private readonly IRoleConfigurationCache permissionAssignmentsCache;
 
-    public RbacAuthorizationService(RbacAuthorizationOptions rbacAuthorizationOptions, TenantRoleBuilder tenantRoleBuilder)
+    public RbacAuthorizationService(IUserRolesLocator userRolesLocator, IRoleConfigurationCache permissionAssignmentsCache)
     {
-        this.rbacAuthorizationOptions = rbacAuthorizationOptions ?? throw new ArgumentNullException(nameof(rbacAuthorizationOptions));
-        this.tenantRoleBuilder = tenantRoleBuilder ?? throw new ArgumentNullException(nameof(tenantRoleBuilder));
+        this.userRolesLocator = userRolesLocator ?? throw new ArgumentNullException(nameof(userRolesLocator));
+        this.permissionAssignmentsCache = permissionAssignmentsCache ?? throw new ArgumentNullException(nameof(permissionAssignmentsCache));
     }
 
-    public async Task<RbacAuthorizationResult> HasPermission(
-        ClaimsPrincipal user,
-        string requiredPermission,
-        string? requiredTenantId = null)
+    public async Task<RbacAuthorizationResult> HasPermission(ClaimsPrincipal user, string requiredPermission, string? requiredTenantId = null)
     {
-        var userRoles = user.Roles();
+        var userRoles = await userRolesLocator.GetUserRolesAsync(user);
 
-        if (rbacAuthorizationOptions.Policy == null)
-        {
-            throw new InvalidOperationException($"{nameof(RbacAuthorizationOptions.Policy)} not configured.");
-        }
-
-        var rolesWithPermission = (await rbacAuthorizationOptions.Policy!.GetRolesWithPermissionAsync(requiredPermission))
-            .Where(role => !tenantRoleBuilder.IsTenantRole(role) || !string.IsNullOrWhiteSpace(requiredTenantId))
-            .Select(role => tenantRoleBuilder.IsTenantRole(role) ? tenantRoleBuilder.Build(role, requiredTenantId!) : role);
+        var rolesWithPermission = await permissionAssignmentsCache.GetRolesWithPermission(requiredPermission, requiredTenantId);
 
         var userRolesWithPermission = rolesWithPermission.Where(requiredRole => userRoles.Any(role => role.Equals(requiredRole, StringComparison.OrdinalIgnoreCase)));
 

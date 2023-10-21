@@ -10,8 +10,8 @@ The below task management application has two types of users, Supervisors and As
 | Endpoint | Permission | Roles |
 | --- | --- | --- |
 | POST /tasks | Tasks.Create | MyApp.Supervisor |
-| GET /tasks | Tasks.Read | MyApp.Assistant <br> MyApp.Supervisor |
-| PUT /tasks/{taskId} | Tasks.Update | MyApp.Assistant <br> MyApp.Supervisor |
+| GET /tasks | Tasks.Read | MyApp.Assistant, MyApp.Supervisor |
+| PUT /tasks/{taskId} | Tasks.Update | MyApp.Assistant, MyApp.Supervisor |
 | DELETE /tasks/{taskId} | Tasks.Delete | MyApp.Supervisor |
 
 
@@ -46,7 +46,7 @@ public static class Roles
 the application has two types of users, Supervisors and Assistants. Only supervisors can create and delete tasks while
 both can read and update the tasks.
 ```c#
-builder.Services.AddRbacAuthorization(builder.Configuration, options =>
+builder.Services.AddRbacAuthorization(options =>
 {
     options.Policy = new StaticPolicyBuilder()
         .AddRolePermissions(Roles.Supervisor, Permissions.TasksCreate, Permissions.TasksRead, Permissions.TasksUpdate, Permissions.TasksDelete)
@@ -81,8 +81,8 @@ By default the library will obtain the tenant identifier from the request RouteD
 | Request | Permission | Roles |
 | --- | --- | --- |
 | POST /{TenantId}/tasks | Tasks.Create | MyApp.$TenantId.Supervisor |
-| GET /{TenantId}/tasks | Tasks.Read | MyApp.$TenantId.Assistant <br> MyApp.$TenantId.Supervisor |
-| PUT /{TenantId}/tasks/{taskId} | Tasks.Update | MyApp.$TenantId.Assistant <br> MyApp.$TenantId.Supervisor |
+| GET /{TenantId}/tasks | Tasks.Read | MyApp.$TenantId.Assistant, MyApp.$TenantId.Supervisor |
+| PUT /{TenantId}/tasks/{taskId} | Tasks.Update | MyApp.$TenantId.Assistant, MyApp.$TenantId.Supervisor |
 | DELETE /{TenantId}/tasks/{taskId} | Tasks.Delete | MyApp.$TenantId.Supervisor |
 
 
@@ -123,7 +123,7 @@ Supervisors and Assistants users and application wide Customer Support staff. On
 tenant while both Supervisor and Assistants can read and update tasks in their tenant. Customer Support staff can read tasks in any tenant due
 to their role not being scoped to a tenant with the $TenantId placeholder.
 ```c#
-builder.Services.AddRbacAuthorization(builder.Configuration, options =>
+builder.Services.AddRbacAuthorization(options =>
 {
     options.Policy = new StaticPolicyBuilder()
         .AddRolePermissions(Roles.TenantSupervisor, Permissions.TasksCreate, Permissions.TasksRead, Permissions.TasksUpdate, Permissions.TasksDelete)
