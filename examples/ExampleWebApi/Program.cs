@@ -17,9 +17,9 @@ builder.Services.AddRbacAuthorization(options =>
     options.TenantIdVariableName = "TenantId"; // Default
 
     options.ConfigureRoles(roles => roles
-        .Add(Roles.TenantSupervisor).WithPermissions(Permissions.TasksCreate, Permissions.TasksRead)
-        .Add(Roles.TenantAssistant).WithPermission(Permissions.TasksRead)
-        .Add(Roles.HelpDesk).WithPermission(Permissions.TasksRead));
+        .Add(Roles.TenantSupervisor).WithPermissions(Permissions.TasksCreate, Permissions.TasksRead, Permissions.TasksUpdate, Permissions.TasksDelete)
+        .Add(Roles.TenantAssistant).WithPermissions(Permissions.TasksRead, Permissions.TasksUpdate)
+        .Add(Roles.CustomerSupport).WithPermission(Permissions.TasksRead));
 });
 
 var app = builder.Build();
@@ -27,7 +27,7 @@ var app = builder.Build();
 app.UseAuthorization();
 
 app.MapPost("/{TenantId}/tasks",
-    [Authorize("unknown")]
+    [Authorize(Permissions.TasksCreate)]
     (string tenantId) =>
 {
     var task = new Task(Id: $"{tenantId}-0", Title: "New todo task");

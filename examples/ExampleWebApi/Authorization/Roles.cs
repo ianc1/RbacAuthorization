@@ -6,5 +6,5 @@ public static class Roles
 
     public const string TenantAssistant = "MyApp.$TenantId.Assistant";
 
-    public const string HelpDesk = "MyApp.HelpDesk";
+    public const string CustomerSupport = "MyApp.CustomerSupport";
 }

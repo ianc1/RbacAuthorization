@@ -48,10 +48,12 @@ both can read and update the tasks.
 ```c#
 builder.Services.AddRbacAuthorization(options =>
 {
-    options.Policy = new StaticPolicyBuilder()
-        .AddRolePermissions(Roles.Supervisor, Permissions.TasksCreate, Permissions.TasksRead, Permissions.TasksUpdate, Permissions.TasksDelete)
-        .AddRolePermissions(Roles.Assistant, Permissions.TasksRead, Permissions.TasksUpdate)
-        .Build();
+    options.UserIdClaimType = ClaimTypes.NameIdentifier; // Default
+    options.UserRoleClaimType = ClaimTypes.Role; // Default
+
+    options.ConfigureRoles(roles => roles
+        .Add(Roles.Supervisor).WithPermissions(Permissions.TasksCreate, Permissions.TasksRead, Permissions.TasksUpdate, Permissions.TasksDelete)
+        .Add(Roles.Assistant).WithPermissions(Permissions.TasksRead, Permissions.TasksUpdate));
 });
 ```
 
@@ -125,11 +127,14 @@ to their role not being scoped to a tenant with the $TenantId placeholder.
 ```c#
 builder.Services.AddRbacAuthorization(options =>
 {
-    options.Policy = new StaticPolicyBuilder()
-        .AddRolePermissions(Roles.TenantSupervisor, Permissions.TasksCreate, Permissions.TasksRead, Permissions.TasksUpdate, Permissions.TasksDelete)
-        .AddRolePermissions(Roles.TenantAssistant, Permissions.TasksRead, Permissions.TasksUpdate)
-        .AddRolePermissions(Roles.CustomerSupport, Permissions.TasksRead)
-        .Build();
+    options.UserIdClaimType = ClaimTypes.NameIdentifier; // Default
+    options.UserRoleClaimType = ClaimTypes.Role; // Default
+    options.TenantIdVariableName = "TenantId"; // Default
+
+    options.ConfigureRoles(roles => roles
+        .Add(Roles.TenantSupervisor).WithPermissions(Permissions.TasksCreate, Permissions.TasksRead, Permissions.TasksUpdate, Permissions.TasksDelete)
+        .Add(Roles.TenantAssistant).WithPermissions(Permissions.TasksRead, Permissions.TasksUpdate)
+        .Add(Roles.CustomerSupport).WithPermission(Permissions.TasksRead));
 });
 ```
 
