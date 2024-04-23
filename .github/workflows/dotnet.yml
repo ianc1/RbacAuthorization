@@ -52,7 +52,7 @@ jobs:
     - name: Restore dependencies
       run: dotnet restore
 
-    - run: dotnet pack --configuration Release --output ${{ env.NuGetDirectory }}
+    - run: dotnet pack --configuration Release --output ${{ env.NuGetDirectory }} .\src\RbacAuthorization\
 
     - uses: actions/upload-artifact@v3
       with:
