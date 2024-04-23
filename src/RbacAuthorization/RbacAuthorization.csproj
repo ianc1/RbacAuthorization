@@ -3,7 +3,6 @@
     <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Description>A flexible Role Based Access Control library that's simple to setup and configure.</Description>
     <Authors>ianc1</Authors>
     <PackageTags>rbac;roles;permissions;authorization</PackageTags>
