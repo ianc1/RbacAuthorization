@@ -23,6 +23,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		README.md = README.md
 	EndProjectSection
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{B078157F-00E6-4222-9898-9C23ADF740DF}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{3B8F88B8-9750-45E1-A30B-379D6FBCE1A7}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\dotnet.yml = .github\workflows\dotnet.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -49,6 +56,8 @@ Global
 		{E7AA7189-646E-49DC-9BEE-7072A0F470B6} = {A64A9C05-1294-4849-8BCA-50F2A33EA7E4}
 		{C81D668C-3F46-4ED5-89E0-F4D103A742CD} = {DE793838-4F4B-4653-9C93-035A046B546B}
 		{BEF17496-AD84-45A8-A111-DAB1EC1DAAF9} = {522FF171-6EB1-4BE0-AB19-BBC2AD07CAB4}
+		{B078157F-00E6-4222-9898-9C23ADF740DF} = {330620F3-AE22-415C-A705-28B8C461B891}
+		{3B8F88B8-9750-45E1-A30B-379D6FBCE1A7} = {B078157F-00E6-4222-9898-9C23ADF740DF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {1BDF942D-5B20-4263-AD5D-CCF93ECB891E}
