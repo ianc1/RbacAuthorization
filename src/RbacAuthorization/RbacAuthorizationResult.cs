@@ -2,6 +2,6 @@ namespace RbacAuthorization;
 
 public record RbacAuthorizationResult(
     bool HasPermission,
-    IEnumerable<string> AllRolesWithPermission,
-    IEnumerable<string> UserRolesWithPermission,
-    IEnumerable<string> UserRoles);
+    IEnumerable<Role> AllRolesWithPermission,
+    IEnumerable<Role> UserRolesWithPermission,
+    IEnumerable<Role> UserRoles);

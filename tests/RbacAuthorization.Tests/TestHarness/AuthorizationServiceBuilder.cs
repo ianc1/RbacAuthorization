@@ -1,5 +1,7 @@
 ﻿namespace RbacAuthorization.Tests.TestHarness;
 
+using System.Security.Claims;
+
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
 using RbacAuthorization.DependencyInjection;
@@ -18,6 +20,10 @@ public class AuthorizationServiceBuilder
 
         services.AddRbacAuthorization(options =>
         {
+            options.AddClaimsPrincipalUserId(ClaimTypes.NameIdentifier);
+
+            options.AddClaimsPrincipalUserRoles(ClaimTypes.Role);
+
             rbacAuthorizationOptionsAction?.Invoke(options);
         });
 

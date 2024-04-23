@@ -1,30 +1,28 @@
 namespace RbacAuthorization;
 
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
+using RbacAuthorization.Utilities;
+using RbacAuthorization.Locators;
 
-public class RbacAuthorizationHandler : AuthorizationHandler<OperationAuthorizationRequirement>
+public class RbacAuthorizationHandler : AuthorizationHandler<PermissionRequirement>
 {
     private readonly IUserIdLocator userIdLocator;
-    private readonly ITenantIdLocator tenantIdLocator;
     private readonly RbacAuthorizationService rbacAuthorizationService;
     private readonly ILogger<RbacAuthorizationHandler> logger;
 
     public RbacAuthorizationHandler(
         IUserIdLocator userIdLocator,
-        ITenantIdLocator tenantIdLocator,
         RbacAuthorizationService rbacAuthorizationService,
         ILogger<RbacAuthorizationHandler> logger)
     {
         this.userIdLocator = userIdLocator ?? throw new ArgumentNullException(nameof(userIdLocator));
-        this.tenantIdLocator = tenantIdLocator ?? throw new ArgumentNullException(nameof(tenantIdLocator));
         this.rbacAuthorizationService = rbacAuthorizationService ?? throw new ArgumentNullException(nameof(rbacAuthorizationService));
         this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
     }
     
-    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, OperationAuthorizationRequirement requirement)
+    protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, PermissionRequirement requirement)
     {   
         ArgumentNullException.ThrowIfNull(context);
         ArgumentNullException.ThrowIfNull(requirement);
@@ -43,23 +41,23 @@ public class RbacAuthorizationHandler : AuthorizationHandler<OperationAuthorizat
 
         if (userId == null)
         {
-            logger.LogUnknownUserDeniedPermission(requirement.Name);
+            logger.LogUnknownUserDeniedPermission(requirement.Permission);
             return;
         }
 
-        var requestedTenantId = tenantIdLocator.GetTenantId(httpContext);
+        var requestPath = httpContext.Request.Path;
 
-        var result = await rbacAuthorizationService.HasPermission(context.User, requirement.Name, requestedTenantId);
+        var result = await rbacAuthorizationService.HasPermission(context.User, requestPath, requirement.Permission);
 
         if (result.HasPermission)
         {
-            logger.LogUserGrantedPermissionByRole(userId, requirement.Name, result.UserRolesWithPermission);
+            logger.LogUserGrantedPermissionByRole(userId, requirement.Permission, result.UserRolesWithPermission);
 
             context.Succeed(requirement);
         }
         else
         {
-            logger.LogUserDeniedPermission(userId, requirement.Name, result.AllRolesWithPermission, result.UserRoles);
+            logger.LogUserDeniedPermission(userId, requirement.Permission, result.AllRolesWithPermission, result.UserRoles);
         }
     }
 }

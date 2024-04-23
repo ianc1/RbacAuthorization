@@ -1,152 +1,128 @@
 # RbacAuthorization
-A simple role based access control library for single and multi tenant applications.
+A flexible Role Based Access Control library that's simple to setup and configure.
+
+The library allows you to assign permissions to controller actions and then
+group these permissions into roles which are then assigned to users.
+
+The default implementation stores the role definitions in memory and retrieves
+the user's id and roles from their token claims. However these can be retrieved
+from any location. See [Customizing Role Retrieval].
+
+Roles can be scoped to a particular request path to further restrict the assigned
+permissions. See [Scoping Role Permissions].
 
 
-
-## Single Tenant Application
-
-The below task management application has two types of users, Supervisors and Assistants. Only supervisors can create and delete tasks while both can read and update the tasks. 
-
-| Endpoint | Permission | Roles |
-| --- | --- | --- |
-| POST /tasks | Tasks.Create | MyApp.Supervisor |
-| GET /tasks | Tasks.Read | MyApp.Assistant, MyApp.Supervisor |
-| PUT /tasks/{taskId} | Tasks.Update | MyApp.Assistant, MyApp.Supervisor |
-| DELETE /tasks/{taskId} | Tasks.Delete | MyApp.Supervisor |
-
-
-### Configuration steps
+### Basic Configuration
 
 1) Add the RbacAuthorization Nuget package.
 ```
 dotnet add package RbacAuthorization
 ```
 
-2) Define your permissions. These can use any format you like but typically include a resource and an action. For example:
+2) Configure and assign permissions to you controller actions.
+
 ```c#
 public static class Permissions
 {
     public const string TasksCreate = "Tasks.Create";
     public const string TasksRead = "Tasks.Read";
-    public const string TasksUpdate = "Tasks.Update";
-    public const string TasksDelete = "Tasks.Delete";
+}
+
+[HttpPost]
+[AuthorizePermission(Permissions.TasksCreate)]
+public ActionResult<TaskDto> CreateTask(TaskCreateDto dto)
+{
+...
+}
+
+[HttpGet("{taskId}")]
+[AuthorizePermission(Permissions.TasksRead)]
+public ActionResult<TaskDto> GetTask(int taskId)
+{
+...
 }
 ```
 
-3) Define your roles. These can also use any format you like but typically include the app name and a job role. For example:
-```c#
+3) Configure your role definitions.
+
+```
 public static class Roles
 {
-    public const string Supervisor = "MyApp.Supervisor";
-    public const string Assistant = "MyApp.Assistant";
+    public static readonly RoleDefinition Admin = new(
+        name: "Admin",
+        permissions:
+        [
+            Permissions.TasksCreate,
+            Permissions.TasksRead,
+        ]);
 }
-```
 
-4) Define a policy to map your roles to permissions. In the below example
-the application has two types of users, Supervisors and Assistants. Only supervisors can create and delete tasks while
-both can read and update the tasks.
-```c#
 builder.Services.AddRbacAuthorization(options =>
 {
-    options.UserIdClaimType = ClaimTypes.NameIdentifier; // Default
-    options.UserRoleClaimType = ClaimTypes.Role; // Default
+    options.AddClaimsPrincipalUserId(ClaimTypes.NameIdentifier);
 
-    options.ConfigureRoles(roles => roles
-        .Add(Roles.Supervisor).WithPermissions(Permissions.TasksCreate, Permissions.TasksRead, Permissions.TasksUpdate, Permissions.TasksDelete)
-        .Add(Roles.Assistant).WithPermissions(Permissions.TasksRead, Permissions.TasksUpdate));
+    options.AddClaimsPrincipalUserRoles(ClaimTypes.Role);
+
+    options.AddInMemoryRoleDefinitions(
+        Roles.Admin);
 });
 ```
 
-5) Assign the permissions to your controller actions using the standard authorize attribute:
-```c#
-app.MapGet("/tasks", [Authorize(Permissions.TasksRead)] () =>
-{
-    return Results.Ok(tasks.GetAll());
-});
-```
+4) Configure users with roles.
 
-6) Configure your Identity Provider to include the relevant roles as `role` claims for your users. This typically involves creating a
+   Configure your Identity Provider to include the relevant roles as `role` claims for your users. This typically involves creating a
 group with the name of each role and assigning them to your users.
 
-    - [Configuring roles in Active Directory](https://learn.microsoft.com/en-us/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps#assign-users-and-groups-to-roles)
+   For example: [Configuring roles in Active Directory](https://learn.microsoft.com/en-us/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps#assign-users-and-groups-to-roles)
 
 
+### Scoping Role Permissions
+Roles can be scoped to a particular request path to further restrict the assigned
+permissions. The path scope can also include parameters to avoid having to define
+multiple similar roles.
 
-## Multi Tenant Application
+In the below example a role called `ProjectAdmin` has been scoped to the path
+`/projects/{ProjectId}` which restricts its permissions to a particular project.
 
-This multi tenant example builds on top the single tenant example above. There are still two types of users, Supervisors and Assistants but this time they are per tenant to provide tenant isolation.
+When the role is assigned to a user, it must also include the path scope and any
+parameters must be replaced with values.
 
-To avoid mapping the same roles for each tenant, multi tenant roles contain a placeholder for the tenant identifier. By default the placeholder is `$TenantId` but it can be changed to match what you call your tenant identifier. For example `$AccountName` or `$CompanyId`.
+For example a user with the `ProjectAdmin:/projects/123` role would have the admin
+permissions for only project `123`.
 
-By default the library will obtain the tenant identifier from the request RouteData value named `TenantId`. You can also obtain the tenant identifier from a request header or subdomain if its not included in the path.
+```
+public static readonly RoleDefinition ProjectAdmin = new(
+    name: "ProjectAdmin",
+    permissions:
+    [
+        Permissions.TasksCreate,
+        Permissions.TasksDelete,
+    ],
+    pathScope: "/projects/{ProjectId}");
+```
 
-| Request | Permission | Roles |
-| --- | --- | --- |
-| POST /{TenantId}/tasks | Tasks.Create | MyApp.$TenantId.Supervisor |
-| GET /{TenantId}/tasks | Tasks.Read | MyApp.$TenantId.Assistant, MyApp.$TenantId.Supervisor |
-| PUT /{TenantId}/tasks/{taskId} | Tasks.Update | MyApp.$TenantId.Assistant, MyApp.$TenantId.Supervisor |
-| DELETE /{TenantId}/tasks/{taskId} | Tasks.Delete | MyApp.$TenantId.Supervisor |
+### Customizing Role Retrieval
 
+How role definitions and user roles are retrieved can be customized by implementing
+a custom locator. The following are available:
+
+- IRoleDefinitionsLocator
+- IUserRolesLocator
+- IUserIdLocator
+
+A common scenario would be to retrieve the user's roles from a database instead
+of from the user's token.
+
+The custom locator will be called for each authorization.
+
+The custom implementations should be registered as a singleton. For example:
+
+```
+options.Services.AddSingleton<IUserRolesLocator, MyCustomUserRolesLocator>();
+```
+
+### Example WebApi
+
+An example WebApi showing the core functionality is available below: 
 
 [View Source](https://github.com/ianc1/RbacAuthorization/tree/main/examples/ExampleWebApi)
-
-
-### Configuration steps
-
-1) Add the RbacAuthorization Nuget package.
-```
-dotnet add package RbacAuthorization
-```
-
-2) Define your permissions. These can use any format you like but typically include a resource and an action. For example:
-```c#
-public static class Permissions
-{
-    public const string TasksCreate = "Tasks.Create";
-    public const string TasksRead = "Tasks.Read";
-    public const string TasksUpdate = "Tasks.Update";
-    public const string TasksDelete = "Tasks.Delete";
-}
-```
-
-3) Define your roles. These can also use any format you like but typically include the app name, tenant identifier and a job role.
-You can also include roles that span all tenants like a customer support role. For example:
-```c#
-public static class Roles
-{
-    public const string TenantSupervisor = "MyApp.$TenantId.Supervisor";
-    public const string TenantAssistant = "MyApp.$TenantId.Assistant";
-    public const string CustomerSupport = "MyApp.CustomerSupport";
-}
-```
-
-4) Define a policy to map your roles to permissions. In the below example the application has three types of users, per tenant
-Supervisors and Assistants users and application wide Customer Support staff. Only supervisors can create and delete tasks in their
-tenant while both Supervisor and Assistants can read and update tasks in their tenant. Customer Support staff can read tasks in any tenant due
-to their role not being scoped to a tenant with the $TenantId placeholder.
-```c#
-builder.Services.AddRbacAuthorization(options =>
-{
-    options.UserIdClaimType = ClaimTypes.NameIdentifier; // Default
-    options.UserRoleClaimType = ClaimTypes.Role; // Default
-    options.TenantIdVariableName = "TenantId"; // Default
-
-    options.ConfigureRoles(roles => roles
-        .Add(Roles.TenantSupervisor).WithPermissions(Permissions.TasksCreate, Permissions.TasksRead, Permissions.TasksUpdate, Permissions.TasksDelete)
-        .Add(Roles.TenantAssistant).WithPermissions(Permissions.TasksRead, Permissions.TasksUpdate)
-        .Add(Roles.CustomerSupport).WithPermission(Permissions.TasksRead));
-});
-```
-
-5) Assign the permissions to your controller actions using the standard authorize attribute:
-```c#
-app.MapGet("/tasks", [Authorize(Permissions.TasksRead)] () =>
-{
-    return Results.Ok(tasks.GetAll());
-});
-```
-
-6) Configure your Identity Provider to include the relevant roles as `role` claims for your users. This typically involves creating a
-group with the name of each role and assigning them to your users.
-
-    - [Configuring roles in Active Directory](https://learn.microsoft.com/en-us/azure/active-directory/develop/howto-add-app-roles-in-azure-ad-apps#assign-users-and-groups-to-roles)

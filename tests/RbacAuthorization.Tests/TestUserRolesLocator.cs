@@ -1,26 +1,26 @@
 namespace RbacAuthorization;
 
+using System.Collections.Immutable;
 using System.Security.Claims;
-using RbacAuthorization.DependencyInjection;
 
-using static RbacAuthorization.Tests.TestHarness.TestValues;
+using RbacAuthorization.Locators;
 
 public class TestUserRolesLocator : IUserRolesLocator
 {
-    private readonly string role;
+    private readonly Role role;
 
-    public TestUserRolesLocator(string role)
+    public TestUserRolesLocator(Role role)
     {
         this.role = role;
     }
 
-    public async Task<IEnumerable<string>> GetUserRolesAsync(ClaimsPrincipal user)
+    public async Task<ImmutableList<Role>> GetUserRolesAsync(ClaimsPrincipal user)
     {
         ArgumentNullException.ThrowIfNull(user);
 
         await Task.Delay(500);
 
-        return new[] { role };
+        return [role];
     }
 }
 

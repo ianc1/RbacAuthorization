@@ -1,4 +1,4 @@
-namespace RbacAuthorization;
+namespace RbacAuthorization.Locators;
 
 using System.Security.Claims;
 

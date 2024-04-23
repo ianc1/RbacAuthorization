@@ -2,7 +2,6 @@ namespace RbacAuthorization.DependencyInjection;
 
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection;
-using RbacAuthorization.ConfigureRoles;
 using RbacAuthorization.Locators;
 
 public static class RbacAuthorizationExtensions
@@ -19,24 +18,27 @@ public static class RbacAuthorizationExtensions
 
         services.AddSingleton<RbacAuthorizationService>();
         services.AddSingleton<IAuthorizationHandler, RbacAuthorizationHandler>();
-        services.AddSingleton<IRoleConfigurationCache, RoleConfigurationCache>();
-        services.AddSingleton<IAuthorizationPolicyProvider, RbacAuthorizationPolicyProvider>();
-        services.AddSingleton<IRoleTenantIdVariableSubstitution, RoleTenantIdVariableSubstitution>();
-
-        // Register default locators
-        services.AddSingleton<IUserIdLocator, UserIdClaimsPrincipalLocator>();
-        services.AddSingleton<IUserRolesLocator, UserRolesClaimsPrincipalLocator>();
-        services.AddSingleton<ITenantIdLocator, TenantIdRouteDataLocator>();
+        services.AddSingleton<IAuthorizationPolicyProvider, PermissionPolicyProvider>();
     }
 
-    public static void ConfigureRoles(
+    public static void AddClaimsPrincipalUserId(
         this RbacAuthorizationOptions options,
-        Action<RolesConfigurationBuilder> rolesAction)
+        string userIdClaimName)
     {
-        var builder = new RolesConfigurationBuilder();
+        options.Services.AddSingleton<IUserIdLocator>(new ClaimsPrincipalUserIdLocator(userIdClaimName));
+    }
 
-        rolesAction.Invoke(builder);
+    public static void AddClaimsPrincipalUserRoles(
+        this RbacAuthorizationOptions options,
+        string userRoleClaimName)
+    {
+        options.Services.AddSingleton<IUserRolesLocator>(new ClaimsPrincipalUserRolesLocator(userRoleClaimName));
+    }
 
-        options.Services.AddSingleton<IRoleConfigurationLocator>(new StaticRoleConfigurationLocator(builder.Build()));
+    public static void AddInMemoryRoleDefinitions(
+        this RbacAuthorizationOptions options,
+        params RoleDefinition[] roleDefinitions)
+    {
+        options.Services.AddSingleton<IRoleDefinitionsLocator>(new InMemoryRoleDefinitionsLocator(roleDefinitions));
     }
 }

@@ -2,8 +2,6 @@
 
 using System.Security.Claims;
 
-using static RbacAuthorization.Tests.TestHarness.TestValues;
-
 public class TestUserBuilder
 {
     private IList<string> roles = new List<string>();
@@ -14,11 +12,12 @@ public class TestUserBuilder
 
     private string? userId;
 
-    public static ClaimsPrincipal ValidUser() =>
-        new TestUserBuilder()
-            .SetUserId(TestUserId)
-            .AddRole(SupervisorRole)
-            .Build();
+    public static ClaimsPrincipal UnauthenticatedUser() =>
+        new ClaimsPrincipal(new ClaimsIdentity());
+
+    public static ClaimsPrincipal NoIdentity() =>
+    new ClaimsPrincipal();
+
 
     public TestUserBuilder SetUserId(string userId)
     {

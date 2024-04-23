@@ -1,10 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
-    <TargetFrameworks>net6.0;net7.0</TargetFrameworks>
+    <TargetFrameworks>net6.0;net8.0</TargetFrameworks>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Description>A simple role based access control library for single and multi tenant applications.</Description>
+    <Description>A flexible Role Based Access Control library that's simple to setup and configure.</Description>
     <Authors>ianc1</Authors>
     <PackageTags>rbac;roles;permissions;authorization</PackageTags>
     <PackageProjectUrl>https://github.com/ianc1/RbacAuthorization</PackageProjectUrl>
@@ -19,16 +19,20 @@
     <IncludeSymbols>true</IncludeSymbols>
     <IncludeSource>true</IncludeSource>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <Version>1.1.0</Version>
+    <Version>2.0.0-prerelease.1</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
-    <PackageReference Include="Microsoft.Identity.Web" Version="1.16.0" />
+    <PackageReference Include="Microsoft.Identity.Web" Version="2.18.0" />
   </ItemGroup>
 
   <ItemGroup>
     <None Include="..\..\LICENSE" Pack="true" PackagePath="" />
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
-  </ItemGroup> 
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="RbacAuthorization.Tests" />
+  </ItemGroup>
 </Project>  

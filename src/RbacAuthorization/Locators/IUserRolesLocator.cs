@@ -1,8 +1,9 @@
-namespace RbacAuthorization;
+namespace RbacAuthorization.Locators;
 
+using System.Collections.Immutable;
 using System.Security.Claims;
 
 public interface IUserRolesLocator
 {
-    Task<IEnumerable<string>> GetUserRolesAsync(ClaimsPrincipal user);
+    Task<ImmutableList<Role>> GetUserRolesAsync(ClaimsPrincipal user);
 }
