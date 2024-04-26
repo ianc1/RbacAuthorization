@@ -27,7 +27,9 @@ public static class Permissions
     public const string TasksCreate = "Tasks.Create";
     public const string TasksRead = "Tasks.Read";
 }
+```
 
+```c#
 [HttpPost]
 [AuthorizePermission(Permissions.TasksCreate)]
 public ActionResult<TaskDto> CreateTask(TaskCreateDto dto)
@@ -45,7 +47,7 @@ public ActionResult<TaskDto> GetTask(int taskId)
 
 3) Configure your role definitions.
 
-```
+```c#
 public static class Roles
 {
     public static readonly RoleDefinition Admin = new(
@@ -56,7 +58,9 @@ public static class Roles
             Permissions.TasksRead,
         ]);
 }
+```
 
+```c#
 builder.Services.AddRbacAuthorization(options =>
 {
     options.AddClaimsPrincipalUserId(ClaimTypes.NameIdentifier);
@@ -90,7 +94,7 @@ parameters must be replaced with values.
 For example a user with the `ProjectAdmin:/projects/123` role would have the admin
 permissions for only project `123`.
 
-```
+```c#
 public static readonly RoleDefinition ProjectAdmin = new(
     name: "ProjectAdmin",
     permissions:
@@ -117,7 +121,7 @@ The custom locator will be called for each authorization.
 
 The custom implementations should be registered as a singleton. For example:
 
-```
+```c#
 options.Services.AddSingleton<IUserRolesLocator, MyCustomUserRolesLocator>();
 ```
 
